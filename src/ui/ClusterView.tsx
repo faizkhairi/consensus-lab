@@ -1,3 +1,5 @@
+import { INVARIANT_INFO } from '../sim/invariants'
+import type { RaftNode } from '../sim/raft'
 import type { Envelope, Message, NodeId } from '../sim/types'
 import {
   APPEND_ENTRIES_COLOR,
@@ -24,6 +26,11 @@ const RING_R = NODE_R + 6
 const DROP_WINDOW_MS = 40
 
 const serverName = (id: NodeId) => `S${id + 1}`
+
+function roleLabel(node: RaftNode): string {
+  if (!node.alive) return 'DOWN'
+  return node.role.toUpperCase()
+}
 
 function nodePos(id: NodeId, count: number): { x: number; y: number } {
   const angle = -Math.PI / 2 + (id * 2 * Math.PI) / count
@@ -63,7 +70,8 @@ export function ClusterView({ ctl }: Props) {
   const count = nodes.length
   const positions = nodes.map((node) => nodePos(node.id, count))
   const leader = cluster.leader
-  const violationNodes = new Set(cluster.violation?.nodes ?? [])
+  const violation = cluster.violation
+  const violationNodes = new Set(violation?.nodes ?? [])
 
   const clusterLabel = [
     `Cluster of ${count} servers.`,
@@ -85,12 +93,52 @@ export function ClusterView({ ctl }: Props) {
   }
 
   return (
-    <section className="rounded-lg border border-slate-800 bg-slate-900 p-4">
+    <section
+      aria-label="Cluster"
+      className={`rounded-lg border bg-slate-900 p-4 ${
+        violation
+          ? 'border-red-700/80 shadow-[0_0_0_1px_rgba(239,68,68,0.25),0_0_32px_-8px_rgba(239,68,68,0.45)]'
+          : 'border-slate-800'
+      }`}
+    >
+      {violation && (
+        <div className="mb-3 rounded-md border border-red-800 bg-red-950/50 px-3 py-2">
+          <p className="text-sm font-semibold text-red-300">
+            {INVARIANT_INFO[violation.invariant].title} violated at t = {Math.round(violation.time)} ms
+          </p>
+          <p className="mt-0.5 text-xs text-red-200/90">{violation.message}</p>
+        </div>
+      )}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-slate-300">
+          {leader ? (
+            <>
+              <span className="font-semibold text-emerald-300">{serverName(leader.id)}</span> leads term{' '}
+              {leader.currentTerm}
+            </>
+          ) : (
+            <span className="text-amber-300">No leader: election in progress</span>
+          )}
+        </p>
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${
+            ctl.playing
+              ? 'bg-sky-500/10 text-sky-300 ring-sky-500/30'
+              : 'bg-slate-800 text-slate-300 ring-slate-700'
+          }`}
+        >
+          <span
+            aria-hidden="true"
+            className={`h-1.5 w-1.5 rounded-full ${ctl.playing ? 'bg-sky-400 motion-safe:animate-pulse' : 'bg-slate-500'}`}
+          />
+          {ctl.playing ? 'Running' : 'Paused'}
+        </span>
+      </div>
       <svg
         viewBox={`0 0 ${SIZE} ${SIZE}`}
         role="img"
         aria-label={clusterLabel}
-        className="mx-auto w-full max-w-md"
+        className="mx-auto w-full max-w-lg"
       >
         <title>{clusterLabel}</title>
         {edges.map(({ a, b, cut }) => {
@@ -188,7 +236,38 @@ export function ClusterView({ ctl }: Props) {
             // Mouse shortcut only: the SVG is one labelled image, and the server table's
             // Crash and Restart buttons are the keyboard and screen-reader path.
             // biome-ignore lint/a11y/noStaticElementInteractions: see above
-            <g key={node.id} onClick={() => act(node.id, node.alive)} className="cursor-pointer">
+            <g key={node.id} onClick={() => act(node.id, node.alive)} className="group cursor-pointer">
+              <title>{`${node.alive ? 'Crash' : 'Restart'} ${serverName(node.id)}`}</title>
+              {node.alive && node.role === 'leader' && (
+                <circle
+                  cx={pos.x}
+                  cy={pos.y}
+                  r={NODE_R + 12}
+                  fill={ROLE_COLOR.leader}
+                  opacity={0.16}
+                  className="motion-safe:animate-pulse"
+                />
+              )}
+              {node.alive && node.role === 'candidate' && (
+                <circle
+                  cx={pos.x}
+                  cy={pos.y}
+                  r={NODE_R + 5}
+                  fill="none"
+                  stroke={ROLE_COLOR.candidate}
+                  strokeWidth={2}
+                  className="motion-safe:animate-pulse"
+                />
+              )}
+              <circle
+                cx={pos.x}
+                cy={pos.y}
+                r={NODE_R + 10}
+                fill="none"
+                stroke="#e2e8f0"
+                strokeWidth={2}
+                className="opacity-0 transition-opacity group-hover:opacity-70"
+              />
               {violationNodes.has(node.id) && (
                 <circle
                   cx={pos.x}
@@ -215,10 +294,28 @@ export function ClusterView({ ctl }: Props) {
               <text x={pos.x} y={pos.y + 12} textAnchor="middle" fontSize={10} fill="#020617">
                 T{node.currentTerm}
               </text>
+              <text
+                x={pos.x}
+                y={pos.y + NODE_R + 19}
+                textAnchor="middle"
+                fontSize={12}
+                fontWeight={600}
+                letterSpacing={0.5}
+                fill={node.alive ? ROLE_COLOR[node.role] : '#94a3b8'}
+                stroke="#0f172a"
+                strokeWidth={3}
+                paintOrder="stroke"
+              >
+                {roleLabel(node)}
+              </text>
             </g>
           )
         })}
       </svg>
+
+      <p className="mt-2 text-center text-xs text-slate-400">
+        Click a server to crash it, and again to restart it.
+      </p>
 
       <ul className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-xs text-slate-400">
         <li className="flex items-center gap-1.5">

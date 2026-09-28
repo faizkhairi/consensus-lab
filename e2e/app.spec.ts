@@ -53,6 +53,55 @@ test('a shared link replays the exact run, including its violation', async ({ pa
   await page.goto(`./#run=${hash}`)
   await expect(invariant(page, 'Leader Completeness')).toContainText('Violated')
   await expect(invariant(page, 'Election Safety')).toContainText('Holds')
+  // The cluster card itself announces the violation, where the eye already is.
+  await expect(page.getByRole('region', { name: 'Cluster' })).toContainText(
+    /Leader Completeness violated at t = \d+ ms/,
+  )
+})
+
+test('clicking a server crashes it and labels it down', async ({ page }) => {
+  await page.goto('./')
+  const cluster = page.getByRole('region', { name: 'Cluster' })
+  await expect(cluster).toContainText('Click a server to crash it')
+  await expect(page.getByRole('img', { name: /is leader of term \d+/ })).toBeVisible({ timeout: 10_000 })
+  await expect(cluster.locator('svg text', { hasText: /^DOWN$/ })).toHaveCount(0)
+  await cluster.locator('svg g.group').first().click()
+  await expect(cluster.locator('svg text', { hasText: /^DOWN$/ })).toHaveCount(1)
+  await expect(page.getByRole('img', { name: /S1 is down/ })).toBeVisible()
+})
+
+test('Inject a bug opens the Bugs tab', async ({ page }) => {
+  await page.goto('./')
+  await page.getByRole('button', { name: 'Inject a bug' }).click()
+  await expect(page.getByRole('tab', { name: 'Bugs' })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('tab', { name: 'Bugs' })).toBeFocused()
+})
+
+test('on a phone, the playback dock plays, pauses and steps back', async ({ page }) => {
+  await page.goto('./')
+  const dock = page.getByRole('group', { name: 'Quick playback' })
+  // Desktop already has the controls beside the cluster, so the dock stays out of the way there.
+  await expect(dock).toBeHidden()
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect(dock).toBeVisible()
+  // The dock must never push the page wider than the smallest supported phone.
+  await page.setViewportSize({ width: 320, height: 700 })
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await dock.getByRole('button', { name: 'Pause' }).click()
+  await expect(dock.getByRole('button', { name: 'Play' })).toBeVisible()
+  const eventNumber = async () =>
+    Number((await page.getByText(/^event #\d+$/).textContent())?.replace('event #', ''))
+  await dock.getByRole('button', { name: 'Step' }).click()
+  const start = await eventNumber()
+  await dock.getByRole('button', { name: 'Back' }).click()
+  await expect(page.getByText(`event #${start - 1}`, { exact: true })).toBeVisible()
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .analyze()
+  expect(
+    results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical').map((v) => v.id),
+  ).toEqual([])
 })
 
 test('the guided tour plays a step and advances', async ({ page }) => {
@@ -143,7 +192,7 @@ test('has no serious or critical accessibility violations', async ({ page }) => 
       .analyze()
     return results.violations
       .filter((v) => v.impact === 'serious' || v.impact === 'critical')
-      .map((v) => `${v.id}: ${v.nodes.length} node(s)`)
+      .map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)
   }
   expect(await check()).toEqual([])
   await page.getByRole('button', { name: 'Take the tour' }).click()

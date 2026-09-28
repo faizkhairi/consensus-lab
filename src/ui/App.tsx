@@ -9,6 +9,7 @@ import { FuzzPanel } from './FuzzPanel'
 import { InvariantPanel } from './InvariantPanel'
 import { LogGrid } from './LogGrid'
 import { NodeTable } from './NodeTable'
+import { PlaybackDock } from './PlaybackDock'
 import { Timeline } from './Timeline'
 import { TourBar } from './TourBar'
 import { interactiveSession, type Panel } from './tour'
@@ -16,6 +17,13 @@ import { useSim } from './useSim'
 
 const REPO_URL = 'https://github.com/faizkhairi/consensus-lab'
 const DESIGN_DOC_URL = `${REPO_URL}/blob/main/docs/DESIGN.md`
+
+// Each claim is measured in the README's Results section and re-checked by the CI fuzz gate.
+const PROOF_POINTS = [
+  '0 violations in 20,000 fuzzed runs of correct Raft',
+  '3 classic Raft bugs to switch on',
+  'Every run replays exactly from its seed',
+]
 
 const TABS: { readonly id: Panel; readonly label: string }[] = [
   { id: 'controls', label: 'Controls' },
@@ -61,6 +69,13 @@ export function App() {
   const [tab, setTab] = useState<Panel>('controls')
   useSim(ctl)
 
+  const panelsRef = useRef<HTMLElement>(null)
+  const openBugs = () => {
+    setTab('bugs')
+    panelsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    document.getElementById('tab-bugs')?.focus({ preventScroll: true })
+  }
+
   const startedRef = useRef(false)
   useEffect(() => {
     if (startedRef.current) return
@@ -105,32 +120,58 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="border-b border-slate-800 px-4 py-4 sm:px-6">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <header className="relative overflow-hidden border-b border-slate-800">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_10%_0%,rgba(52,211,153,0.14),transparent_55%),radial-gradient(ellipse_at_90%_0%,rgba(56,189,248,0.12),transparent_50%)]"
+        />
+        <div className="relative mx-auto flex max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6 sm:py-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-50">consensus-lab</h1>
-            <p className="mt-1 max-w-2xl text-sm text-slate-400">
-              A deterministic Raft simulator with a live safety oracle and a fuzzer that finds and shrinks
-              counterexamples.
+            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
+              Raft, simulated in your browser
             </p>
+            <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-50 sm:text-4xl">
+              consensus-lab
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm text-slate-300 sm:text-base">
+              Crash servers, cut the network and switch on real Raft bugs. A live oracle checks every safety
+              property, and a seeded fuzzer finds the failing run and shrinks it, often to one or two faults.
+            </p>
+            <ul className="mt-4 flex flex-wrap gap-2 text-xs text-slate-300">
+              {PROOF_POINTS.map((point) => (
+                <li
+                  key={point}
+                  className="rounded-full border border-slate-700/80 bg-slate-900/70 px-2.5 py-1"
+                >
+                  {point}
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-sm">
+          <div className="flex flex-wrap items-center gap-2 text-sm lg:shrink-0 lg:flex-nowrap">
             <button
               type="button"
               onClick={() => setTouring(true)}
-              className="rounded border border-sky-700 bg-sky-500/10 px-3 py-1.5 font-medium text-sky-300 hover:bg-sky-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
+              className="rounded-md bg-sky-500 px-4 py-2 font-semibold text-slate-950 shadow-lg shadow-sky-500/20 hover:bg-sky-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-300"
             >
               Take the tour
             </button>
+            <button
+              type="button"
+              onClick={openBugs}
+              className="rounded-md border border-amber-600/70 bg-amber-500/10 px-4 py-2 font-medium text-amber-200 hover:bg-amber-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
+            >
+              Inject a bug
+            </button>
             <a
               href={REPO_URL}
-              className="rounded px-2 py-1.5 text-slate-300 underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
+              className="rounded px-2 py-2 text-slate-300 underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
             >
               Source
             </a>
             <a
               href={DESIGN_DOC_URL}
-              className="rounded px-2 py-1.5 text-slate-300 underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
+              className="rounded px-2 py-2 text-slate-300 underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
             >
               How it works
             </a>
@@ -138,7 +179,7 @@ export function App() {
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_360px]">
+      <main className="mx-auto grid max-w-6xl gap-6 px-4 pt-6 pb-24 sm:px-6 lg:grid-cols-[1fr_360px] lg:pb-6">
         <div className="flex min-w-0 flex-col gap-6">
           {touring && (
             <TourBar
@@ -159,7 +200,7 @@ export function App() {
         <div className="flex min-w-0 flex-col gap-6">
           <InvariantPanel ctl={ctl} />
 
-          <section className="rounded-lg border border-slate-800 bg-slate-900">
+          <section ref={panelsRef} className="scroll-mt-4 rounded-lg border border-slate-800 bg-slate-900">
             <div role="tablist" aria-label="Simulation panels" className="flex border-b border-slate-800">
               {TABS.map((t) => (
                 <button
@@ -212,6 +253,7 @@ export function App() {
           <EventFeed ctl={ctl} />
         </div>
       </main>
+      <PlaybackDock ctl={ctl} />
     </div>
   )
 }

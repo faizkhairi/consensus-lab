@@ -36,3 +36,19 @@ export function StepIcon({ className }: IconProps) {
     </svg>
   )
 }
+
+export function CheckIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" fill="none" stroke="currentColor">
+      <path d="M4.5 10.5l3.5 3.5 7.5-8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function CrossIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" fill="none" stroke="currentColor">
+      <path d="M5.5 5.5l9 9M14.5 5.5l-9 9" strokeWidth="2.2" strokeLinecap="round" />
+    </svg>
+  )
+}

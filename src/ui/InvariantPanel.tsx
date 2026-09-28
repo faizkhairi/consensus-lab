@@ -1,6 +1,7 @@
 import { INVARIANT_INFO } from '../sim/invariants'
 import { INVARIANT_IDS } from '../sim/types'
 import type { SimController } from './controller'
+import { CheckIcon, CrossIcon } from './icons'
 import { useSim } from './useSim'
 
 interface Props {
@@ -14,7 +15,10 @@ export function InvariantPanel({ ctl }: Props) {
 
   return (
     <section className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-      <h2 className="text-sm font-semibold text-slate-200">Safety invariants</h2>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="text-sm font-semibold text-slate-200">Safety invariants</h2>
+        <span className="text-xs text-slate-400">checked after every event</span>
+      </div>
       <ul className="mt-3 flex flex-col gap-3 text-sm">
         {INVARIANT_IDS.map((id) => {
           const info = INVARIANT_INFO[id]
@@ -23,7 +27,14 @@ export function InvariantPanel({ ctl }: Props) {
             <li key={id} className="border-b border-slate-800/60 pb-3 last:border-0 last:pb-0">
               <div className="flex items-center justify-between gap-3">
                 <span className="font-medium text-slate-100">{info.title}</span>
-                <span className={violation ? 'font-semibold text-red-400' : 'font-semibold text-emerald-400'}>
+                <span
+                  className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ${
+                    violation
+                      ? 'bg-red-500/15 text-red-300 ring-red-500/40'
+                      : 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30'
+                  }`}
+                >
+                  {violation ? <CrossIcon className="h-3.5 w-3.5" /> : <CheckIcon className="h-3.5 w-3.5" />}
                   {violation ? 'Violated' : 'Holds'}
                 </span>
               </div>
