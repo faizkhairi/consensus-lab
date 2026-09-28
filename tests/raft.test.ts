@@ -296,6 +296,31 @@ describe('RaftNode: AppendEntries on a follower', () => {
     expect(effects).toContainEqual({ kind: 'logTruncated', from: 2, role: 'follower' })
   })
 
+  it('makes a rival leader of the same term step down before its log is truncated', () => {
+    // Only reachable once election safety is broken, but it is why Leader
+    // Append-Only holds: truncation always happens as a follower.
+    const node = makeNode(0)
+    node.log = [{ term: 1, cmd: 'a' }]
+    node.currentTerm = 1
+    elect(node)
+    expect(node.role).toBe('leader')
+    const effects = node.onMessage(
+      1,
+      append(2, 1, 1, [
+        { term: 1, cmd: 'b' },
+        { term: 2, cmd: 'c' },
+      ]),
+      0,
+    )
+    const steppedDown = effects.findIndex((e) => e.kind === 'steppedDown')
+    const truncated = effects.findIndex((e) => e.kind === 'logTruncated')
+    expect(effects[steppedDown]).toEqual({ kind: 'steppedDown', from: 'leader' })
+    expect(effects[truncated]).toEqual({ kind: 'logTruncated', from: 2, role: 'follower' })
+    expect(steppedDown).toBeLessThan(truncated)
+    expect(node.role).toBe('follower')
+    expect(node.log.map((e) => e.cmd)).toEqual(['a', 'b', 'c'])
+  })
+
   it('makes a candidate of the same term step down', () => {
     const node = makeNode(4)
     node.onElectionTimeout(0)

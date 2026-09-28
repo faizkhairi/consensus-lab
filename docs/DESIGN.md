@@ -102,7 +102,7 @@ Throughput on a laptop is about 4 million events per second in a single thread. 
 
 ## 6. Shrinking
 
-`shrink()` in `fuzz.ts` minimises the fault list with delta debugging (Zeller's ddmin):
+`shrink()` in `fuzz.ts` minimises the fault list with delta debugging (a complement-only variant of Zeller's ddmin):
 
 1. Drop every fault scheduled after the violation; it never fired.
 2. Split the list into `n` chunks and try removing each chunk. If the run still breaks **the same invariant**, keep the smaller list and coarsen the split; otherwise refine it, down to single faults.

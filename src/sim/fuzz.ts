@@ -77,7 +77,7 @@ export interface ShrinkResult {
 }
 
 /**
- * Minimise a counterexample's fault schedule with delta debugging (ddmin).
+ * Minimise a counterexample's fault schedule with delta debugging (a complement-only variant of ddmin).
  *
  * The seed is fixed, so every candidate schedule is replayed deterministically;
  * a candidate is kept when it still breaks the same invariant. Faults after the
