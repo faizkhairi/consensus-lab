@@ -14,6 +14,12 @@ export function TourBar({ ctl, onSetTab, onExit }: Props) {
   const snapshots = useRef<Snapshot[]>([])
   const initialized = useRef(false)
   const [index, setIndex] = useState(0)
+  // Handlers read the ref, not the render's `index`: a double click must not enter the same step twice.
+  const current = useRef(0)
+  const moveTo = (target: number) => {
+    current.current = target
+    setIndex(target)
+  }
 
   useEffect(() => {
     if (initialized.current) return
@@ -30,29 +36,29 @@ export function TourBar({ ctl, onSetTab, onExit }: Props) {
   const isLast = index === TOUR.length - 1
 
   const goNext = () => {
-    if (isLast) {
+    if (current.current === TOUR.length - 1) {
       onExit()
       return
     }
-    const target = index + 1
+    const target = current.current + 1
     const nextStep = TOUR[target]
     if (!nextStep) return
     snapshots.current[target] = ctl.snapshot()
     nextStep.enter(ctl)
     if (nextStep.panel) onSetTab(nextStep.panel)
-    setIndex(target)
+    moveTo(target)
   }
 
   const goPrevious = () => {
-    if (index === 0) return
-    const target = index - 1
+    if (current.current === 0) return
+    const target = current.current - 1
     const prevStep = TOUR[target]
     const snap = snapshots.current[target]
     if (!prevStep) return
     if (snap) ctl.restore(snap)
     prevStep.enter(ctl)
     if (prevStep.panel) onSetTab(prevStep.panel)
-    setIndex(target)
+    moveTo(target)
   }
 
   const statusLine =

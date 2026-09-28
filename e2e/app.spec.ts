@@ -49,6 +49,21 @@ test('the guided tour plays a step and advances', async ({ page }) => {
   await expect(tour).toContainText('Step 2 of 9')
 })
 
+test('two clicks on Next before a re-render advance two steps, running each step once', async ({ page }) => {
+  await page.goto('./')
+  await page.getByRole('button', { name: 'Take the tour' }).click()
+  const tour = page.getByRole('region', { name: 'Guided tour' })
+  await expect(tour).toContainText('ready for the next step', { timeout: 15_000 })
+  // Both clicks land in one task, so React has not re-rendered between them.
+  await tour.getByRole('button', { name: 'Next' }).evaluate((button: HTMLElement) => {
+    button.click()
+    button.click()
+  })
+  await expect(tour).toContainText('Step 3 of 9')
+  // Step 2 sends three writes; entering it twice would send six.
+  await expect(page.getByText(/^3 writes, 0 rejected$/)).toBeVisible()
+})
+
 test('the tour reaches the Figure 8 bug and the event feed shows only that run, newest first', async ({
   page,
 }) => {
