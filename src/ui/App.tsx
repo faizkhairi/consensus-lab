@@ -137,7 +137,16 @@ export function App() {
 
       <main className="mx-auto grid max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_360px]">
         <div className="flex min-w-0 flex-col gap-6">
-          {touring && <TourBar ctl={ctl} onSetTab={setTab} onExit={() => setTouring(false)} />}
+          {touring && (
+            <TourBar
+              ctl={ctl}
+              onSetTab={setTab}
+              onExit={() => {
+                ctl.pause()
+                setTouring(false)
+              }}
+            />
+          )}
           <ClusterView ctl={ctl} />
           <Timeline ctl={ctl} />
           <LogGrid ctl={ctl} />

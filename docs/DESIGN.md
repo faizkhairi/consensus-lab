@@ -114,7 +114,7 @@ The seed stays fixed throughout, so each candidate is replayed deterministically
 
 `src/ui/controller.ts` owns the running cluster and knows nothing about the DOM. The page drives it from `requestAnimationFrame` (at 1x, 100 ms of virtual time per real second, so individual messages are visible), and React subscribes to a version counter with `useSyncExternalStore`, so there is no React state update per simulation event.
 
-Time travel is re-simulation. Scrubbing backwards rebuilds the cluster from its session and replays to the target, which takes milliseconds at this scale. Acting after scrubbing back discards the old future and starts a new branch. A share link encodes the session and the current time in the URL fragment, and the decoder validates every field before use.
+Time travel is re-simulation. Scrubbing backwards rebuilds the cluster from its session and replays to the target, which takes milliseconds at this scale. Acting after scrubbing back discards the old future and starts a new branch. A share link encodes the session and the current time in the URL fragment, and the decoder validates every field before use. Opening a link replays the run synchronously, so links are limited to the first 10 minutes of simulated time (`MAX_SHARED_TIME`); a longer time would freeze the page.
 
 The fuzzer runs in a Web Worker in slices of 25 seeds and yields between slices, so the page stays responsive and a stop request takes effect promptly.
 

@@ -47,6 +47,13 @@ export interface SharedRun {
 
 const VERSION = 1
 
+/**
+ * Latest virtual time a link may point at. Opening a link re-simulates up to
+ * it synchronously, so an unbounded value would freeze the page; 10 minutes
+ * of simulated time replays in about a tenth of a second.
+ */
+export const MAX_SHARED_TIME = 600_000
+
 /** Encode a run for a URL fragment: compact JSON, then base64url. */
 export function encodeRun(run: SharedRun): string {
   const { session } = run
@@ -77,7 +84,14 @@ export function decodeRun(encoded: string): SharedRun | null {
   }
   if (!isRecord(data) || data.v !== VERSION) return null
   const { s, m, b, ta, ra, t } = data
-  if (!isUint32(s) || (m !== 'interactive' && m !== 'fuzz') || !isFiniteNumber(t) || t < 0) return null
+  if (
+    !isUint32(s) ||
+    (m !== 'interactive' && m !== 'fuzz') ||
+    !isFiniteNumber(t) ||
+    t < 0 ||
+    t > MAX_SHARED_TIME
+  )
+    return null
   if (!Array.isArray(b) || !b.every((name) => (BUG_NAMES as readonly unknown[]).includes(name))) return null
   if (!Array.isArray(ta) || !ta.every(isTimedAction)) return null
   if (!Array.isArray(ra) || !ra.every(isRecordedAction)) return null

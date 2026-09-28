@@ -1,5 +1,5 @@
 import { type KeyboardEvent, useState } from 'react'
-import { encodeRun } from '../sim/session'
+import { encodeRun, MAX_SHARED_TIME } from '../sim/session'
 import type { NodeId } from '../sim/types'
 import type { SimController } from './controller'
 import { PauseIcon, PlayIcon, StepIcon } from './icons'
@@ -66,6 +66,12 @@ export function Controls({ ctl }: Props) {
   }
 
   const shareLink = async () => {
+    if (cluster.now > MAX_SHARED_TIME) {
+      setStatus(
+        `Too long to share: links cover the first ${MAX_SHARED_TIME / 60_000} minutes of simulated time`,
+      )
+      return
+    }
     const hash = `#run=${encodeRun({ session: ctl.session, time: cluster.now })}`
     const link = `${window.location.origin}${window.location.pathname}${hash}`
     window.history.replaceState(null, '', hash)

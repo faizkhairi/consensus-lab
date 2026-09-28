@@ -5,6 +5,7 @@ import {
   decodeRun,
   encodeRun,
   isAction,
+  MAX_SHARED_TIME,
   type Session,
   sessionConfig,
 } from '../src/sim/session'
@@ -63,6 +64,13 @@ describe('session', () => {
     for (const payload of bad) expect(decodeRun(encodeJson(payload))).toBeNull()
     expect(decodeRun('%%%not base64%%%')).toBeNull()
     expect(decodeRun(btoa('{not json'))).toBeNull()
+  })
+
+  it('refuses a link past the replay limit, which would freeze the page', () => {
+    const valid = { v: 1, s: 1, m: 'interactive', b: [], ta: [], ra: [] }
+    expect(decodeRun(encodeJson({ ...valid, t: MAX_SHARED_TIME }))?.time).toBe(MAX_SHARED_TIME)
+    expect(decodeRun(encodeJson({ ...valid, t: MAX_SHARED_TIME + 1 }))).toBeNull()
+    expect(decodeRun(encodeJson({ ...valid, t: 1e12 }))).toBeNull()
   })
 
   it('validates every action shape', () => {

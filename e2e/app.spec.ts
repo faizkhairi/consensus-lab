@@ -49,6 +49,23 @@ test('the guided tour plays a step and advances', async ({ page }) => {
   await expect(tour).toContainText('Step 2 of 9')
 })
 
+test('ending the tour mid-step pauses the run', async ({ page }) => {
+  await page.goto('./')
+  await page.getByRole('button', { name: 'Take the tour' }).click()
+  const tour = page.getByRole('region', { name: 'Guided tour' })
+  for (let step = 2; step <= 7; step++) {
+    await tour.getByRole('button', { name: 'Next' }).click()
+    await expect(tour).toContainText(`Step ${step} of 9`)
+  }
+  // Step 7 plays for several seconds of real time before its violation.
+  await page.getByRole('tab', { name: 'Controls' }).click()
+  await expect(page.getByRole('button', { name: 'Pause', exact: true })).toBeVisible()
+  await tour.getByRole('button', { name: 'End tour' }).click()
+  await expect(tour).toBeHidden()
+  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible({ timeout: 2_000 })
+  await expect(invariant(page, 'Leader Completeness')).toContainText('Holds')
+})
+
 test('two clicks on Next before a re-render advance two steps, running each step once', async ({ page }) => {
   await page.goto('./')
   await page.getByRole('button', { name: 'Take the tour' }).click()
