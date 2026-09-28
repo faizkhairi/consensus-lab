@@ -4,7 +4,9 @@ A deterministic simulator of the [Raft](https://raft.github.io/) consensus algor
 
 **Live demo: https://faizkhairi.github.io/consensus-lab/**
 
-<!-- screenshots -->
+![The fuzzer's shrunk counterexample replayed: S3 wins term 19 without a committed entry, and the oracle flags Leader Completeness](docs/fuzzer-replay.png)
+
+![Log replication in the guided tour: the leader S5 has replicated three writes to every server](docs/replication.png)
 
 ## What you can do
 
