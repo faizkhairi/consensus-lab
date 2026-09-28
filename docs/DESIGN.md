@@ -25,7 +25,7 @@ Randomness comes from xoshiro128\*\* streams (`rng.ts`). Each stream is derived 
 
 Separate streams matter for shrinking. With a single network stream, removing one fault changes how many random numbers are drawn before every later message, so the rest of the run diverges completely (the butterfly effect) and a smaller schedule rarely reproduces the same bug. With one stream per link, removing a fault only perturbs the links it actually touched. In practice, switching to per-link streams made shrunk counterexamples noticeably smaller.
 
-Operator actions are recorded against the event count rather than the time, because the UI can pause between two events that share a timestamp. Replaying a recorded action therefore lands at exactly the same point in the event sequence, and `Cluster.seek(eventCount, time)` can reconstruct any position.
+Operator actions are recorded against the event count rather than the time, because the UI can pause between two events that share a timestamp. Replaying a recorded action therefore lands at exactly the same point in the event sequence, and `Cluster.seek(eventCount, time)` can reconstruct any position. Stepping back one event passes `advanceClock = false`, so the clock stops at the last replayed event or action instead of jumping forward to `time`.
 
 ## 2. The Raft implementation
 

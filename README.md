@@ -18,7 +18,7 @@ A deterministic simulator of the [Raft](https://raft.github.io/) consensus algor
   - granting votes without the up-to-date check.
 - **See the oracle catch it.** The five properties from Figure 3 of the Raft paper are checked after every event. When one breaks, the run pauses at the exact event.
 - **Hunt with the fuzzer.** A Web Worker runs thousands of seeded runs with random faults. When one fails, delta debugging shrinks the fault schedule, often down to one or two faults, and you can replay the result.
-- **Travel in time and share.** Every run is deterministic, so you can scrub the timeline back and forth. A share link reproduces the exact run on another machine.
+- **Travel in time and share.** Every run is deterministic, so you can scrub the timeline back and forth or step back one event at a time (Left arrow). A share link reproduces the exact run on another machine.
 
 ## How it works
 
@@ -77,7 +77,7 @@ docs/         design notes
 - Each safety check has a positive control: a hand-built bad state that the check must report.
 - Property tests (fast-check) generate random fault schedules and assert that safety holds, that runs are deterministic, and that the cluster recovers once faults stop.
 - Pinned counterexamples must fail with their bug switched on and pass with it off.
-- Playwright tests the built site: the election on load, share-link replay, the tour, and fuzz-then-replay. They fail on any console error and run an axe accessibility scan.
+- Playwright tests the built site: the election on load, stepping forward and back, share-link replay, the tour (including ending it mid-step), and fuzz-then-replay. They fail on any console error and run an axe accessibility scan.
 
 The site deploys only after every check passes.
 
