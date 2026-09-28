@@ -77,6 +77,8 @@ test('ending the tour mid-step pauses the run', async ({ page }) => {
   }
   // Step 7 plays for several seconds of real time before its violation.
   await page.getByRole('tab', { name: 'Controls' }).click()
+  // Quarter speed widens the margin before the violation on a slow runner.
+  await page.getByLabel('Speed').selectOption('0.25')
   await expect(page.getByRole('button', { name: 'Pause', exact: true })).toBeVisible()
   await tour.getByRole('button', { name: 'End tour' }).click()
   await expect(tour).toBeHidden()

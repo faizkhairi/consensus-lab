@@ -119,8 +119,8 @@ export class SimController {
 
   /**
    * Undo the last processed event, then pause. Re-simulates to one event
-   * earlier with the clock at the undone event's time, so operator actions
-   * taken between the two events are replayed rather than dropped.
+   * earlier, replaying operator actions taken before the undone event (up to
+   * its time) rather than dropping them; the clock stops at the last of those.
    */
   stepBack(): void {
     this.playing = false
@@ -129,7 +129,7 @@ export class SimController {
     if (target >= 0) {
       const time = this.cluster.lastEventTime
       this.rebuild()
-      this.cluster.seek(target, time)
+      this.cluster.seek(target, time, false)
     }
     this.afterMove()
   }

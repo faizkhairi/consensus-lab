@@ -95,9 +95,10 @@ export function Controls({ ctl }: Props) {
           <button
             type="button"
             onClick={() => ctl.stepBack()}
-            disabled={cluster.eventCount === 0}
+            // aria-disabled, not disabled: a disabled button drops keyboard focus mid-use.
+            aria-disabled={cluster.eventCount === 0}
             aria-keyshortcuts="ArrowLeft"
-            className="flex items-center gap-1.5 rounded border border-slate-700 px-3 py-1.5 text-slate-100 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400 disabled:opacity-40"
+            className="flex items-center gap-1.5 rounded border border-slate-700 px-3 py-1.5 text-slate-100 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400 aria-disabled:opacity-40"
           >
             <StepBackIcon className="h-4 w-4" />
             Back

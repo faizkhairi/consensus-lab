@@ -181,12 +181,14 @@ export class Cluster {
   /**
    * Replay to an exact position: `eventCount` events processed and the clock
    * at `time`. Positions are counted in events, not time, because a run can
-   * be paused between two events that share a timestamp.
+   * be paused between two events that share a timestamp. With
+   * `advanceClock` false, recorded actions up to `time` are still replayed
+   * but the clock stops at the last event or action instead of at `time`.
    */
-  seek(eventCount: number, time: number): void {
+  seek(eventCount: number, time: number, advanceClock = true): void {
     while (this.eventCount < eventCount && this.step()) {}
     this.flushPending(time)
-    if (time > this.now) this.now = time
+    if (advanceClock && time > this.now) this.now = time
   }
 
   /** Apply an operator action now and record it so the run can be replayed exactly. */

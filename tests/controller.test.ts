@@ -104,13 +104,15 @@ describe('SimController', () => {
       const reference = new SimController(interactiveSession(3))
       for (let i = 0; i < 40; i++) ctl.stepOnce()
       for (let i = 0; i < 39; i++) reference.stepOnce()
-      const undoneAt = ctl.cluster.lastEventTime
+      const explored = ctl.horizonTrace.length
       ctl.play()
       ctl.stepBack()
       expect(ctl.playing).toBe(false)
       expect(ctl.cluster.eventCount).toBe(39)
       expect(state(ctl)).toBe(state(reference))
-      expect(ctl.cluster.now).toBe(undoneAt)
+      // The clock moves back too, and the timeline keeps the undone event's marker.
+      expect(fingerprint(ctl.cluster)).toBe(fingerprint(reference.cluster))
+      expect(ctl.horizonTrace).toHaveLength(explored)
       ctl.stepOnce()
       expect(ctl.cluster.eventCount).toBe(40)
     })
@@ -119,8 +121,10 @@ describe('SimController', () => {
       const ctl = new SimController(interactiveSession(3))
       while (ctl.cluster.leader === null) ctl.stepOnce()
       ctl.act({ type: 'write' })
+      const wroteAt = ctl.cluster.now
       ctl.stepOnce()
       ctl.stepBack()
+      expect(ctl.cluster.now).toBe(wroteAt)
       expect(ctl.cluster.recorded).toHaveLength(1)
       expect(ctl.cluster.stats.writes).toBe(1)
       // Acting again must not treat the write as an abandoned future and drop it.
