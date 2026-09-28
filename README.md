@@ -4,21 +4,22 @@ A deterministic simulator of the [Raft](https://raft.github.io/) consensus algor
 
 **Live demo: https://faizkhairi.github.io/consensus-lab/**
 
-![The fuzzer's shrunk counterexample replayed: S3 wins term 19 without a committed entry, and the oracle flags Leader Completeness](docs/fuzzer-replay.png)
+![The fuzzer's shrunk counterexample replayed: S4 wins term 3 without a committed entry, and the oracle flags Leader Completeness](docs/fuzzer-replay.png)
 
 ![Log replication in the guided tour: the leader S5 has replicated three writes to every server](docs/replication.png)
 
 ## What you can do
 
 - **Watch Raft work.** Messages move between servers. Each server shows its election timer, and every log entry is coloured by its term. The guided tour covers election, replication, a leader crash, a network partition and the heal.
-- **Break things.** Crash and restart servers, isolate the leader, partition the cluster, raise message loss and send client writes.
+- **Break things.** Click a server to crash it and again to restart it, isolate the leader, partition the cluster, raise message loss and send client writes.
 - **Inject a bug.** Three well-known Raft mistakes, each behind one flag:
   - committing entries from earlier terms (the Figure 8 scenario);
   - forgetting `votedFor` on restart;
   - granting votes without the up-to-date check.
-- **See the oracle catch it.** The five properties from Figure 3 of the Raft paper are checked after every event. When one breaks, the run pauses at the exact event.
+- **See the oracle catch it.** The five properties from Figure 3 of the Raft paper are checked after every event. When one breaks, the run pauses at the exact event and the cluster card names the property and the event that broke it.
 - **Hunt with the fuzzer.** A Web Worker runs thousands of seeded runs with random faults. When one fails, delta debugging shrinks the fault schedule, often down to one or two faults, and you can replay the result.
 - **Travel in time and share.** Every run is deterministic, so you can scrub the timeline back and forth or step back one event at a time (Left arrow). A share link reproduces the exact run on another machine.
+- **Use it on a phone.** Below desktop width a playback dock (Back, Play or Pause, Step) stays at the bottom of the screen, so you can control the run while watching the cluster.
 
 ## How it works
 
@@ -77,7 +78,7 @@ docs/         design notes
 - Each safety check has a positive control: a hand-built bad state that the check must report.
 - Property tests (fast-check) generate random fault schedules and assert that safety holds, that runs are deterministic, and that the cluster recovers once faults stop.
 - Pinned counterexamples must fail with their bug switched on and pass with it off.
-- Playwright tests the built site: the election on load, stepping forward and back, share-link replay, the tour (including ending it mid-step), and fuzz-then-replay. They fail on any console error and run an axe accessibility scan.
+- Playwright tests the built site: the election on load, stepping forward and back, share-link replay and its violation banner, crashing a server by clicking it, the Inject a bug shortcut, the phone playback dock, the tour (including ending it mid-step), and fuzz-then-replay. They fail on any console error and run an axe accessibility scan at desktop and phone widths.
 
 The site deploys only after every check passes.
 

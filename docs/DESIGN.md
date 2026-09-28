@@ -118,6 +118,10 @@ Time travel is re-simulation. Scrubbing backwards rebuilds the cluster from its 
 
 The fuzzer runs in a Web Worker in slices of 25 seeds and yields between slices, so the page stays responsive and a stop request takes effect promptly.
 
+Below the `lg` breakpoint a fixed playback dock (Back, Play or Pause, Step) keeps the controls in reach while the cluster is on screen. At `lg` and above it is `display: none`, which also removes it from the accessibility tree, so each control has one accessible name per viewport.
+
+The social card `public/og.png` is a 1200x630 screenshot of the built site opened on the share link for the pinned Figure 8 counterexample (`PINNED.commitPriorTerm`), taken once the cluster card shows the violation.
+
 ## 8. Testing
 
 | Layer | What it covers |
@@ -129,6 +133,6 @@ The fuzzer runs in a Web Worker in slices of 25 seeds and yields between slices,
 | fuzz | 300 seeds in the unit suite; 20,000 in CI; each bug is caught within a seed budget and shrinks to a smaller schedule that still fails |
 | pinned counterexamples | still fail with the bug on, pass with it off |
 | tour | every guided-tour step reaches its end state headlessly |
-| end to end (Playwright) | election on load, share-link replay, tour, fuzz and replay, zero console errors, axe with no serious or critical findings |
+| end to end (Playwright) | election on load, share-link replay and its violation banner, crashing a server by clicking it, the Inject a bug shortcut, the phone playback dock (no horizontal scroll at 320 px), tour, fuzz and replay, zero console errors, axe with no serious or critical findings at desktop and phone widths |
 
 Coverage of `src/sim` is enforced at 90% lines, functions and statements and 80% branches.
