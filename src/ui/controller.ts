@@ -117,6 +117,23 @@ export class SimController {
     this.afterMove()
   }
 
+  /**
+   * Undo the last processed event, then pause. Re-simulates to one event
+   * earlier with the clock at the undone event's time, so operator actions
+   * taken between the two events are replayed rather than dropped.
+   */
+  stepBack(): void {
+    this.playing = false
+    this.until = null
+    const target = this.cluster.eventCount - 1
+    if (target >= 0) {
+      const time = this.cluster.lastEventTime
+      this.rebuild()
+      this.cluster.seek(target, time)
+    }
+    this.afterMove()
+  }
+
   /** Run a pending `playUntil` without real time passing (for tests and headless use). */
   runHeadless(maxVirtualMs: number): StopReason {
     const end = this.cluster.now + maxVirtualMs

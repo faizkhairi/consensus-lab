@@ -94,6 +94,9 @@ export function App() {
       } else if (event.code === 'ArrowRight') {
         event.preventDefault()
         ctl.stepOnce()
+      } else if (event.code === 'ArrowLeft') {
+        event.preventDefault()
+        ctl.stepBack()
       }
     }
     window.addEventListener('keydown', onKeyDown)

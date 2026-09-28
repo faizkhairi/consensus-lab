@@ -78,6 +78,8 @@ export class Cluster {
 
   now = 0
   eventCount = 0
+  /** Virtual time of the most recently processed event. */
+  lastEventTime = 0
   bugs: BugFlags
   dropRate: number
   /** Partition group per node, or null when the network is whole. */
@@ -158,6 +160,7 @@ export class Cluster {
     this.flushPending(next.time)
     const event = this.queue.pop() as Scheduled
     this.now = event.time
+    this.lastEventTime = event.time
     this.eventCount++
     this.handle(event)
     return true

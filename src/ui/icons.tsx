@@ -19,6 +19,15 @@ export function PauseIcon({ className }: IconProps) {
   )
 }
 
+export function StepBackIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true" fill="currentColor">
+      <path d="M15.5 4.5v11l-7-5.5 7-5.5Z" />
+      <rect x="4.8" y="4.5" width="2" height="11" rx="0.5" />
+    </svg>
+  )
+}
+
 export function StepIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 20 20" className={className} aria-hidden="true" fill="currentColor">

@@ -2,7 +2,7 @@ import { type KeyboardEvent, useState } from 'react'
 import { encodeRun, MAX_SHARED_TIME } from '../sim/session'
 import type { NodeId } from '../sim/types'
 import type { SimController } from './controller'
-import { PauseIcon, PlayIcon, StepIcon } from './icons'
+import { PauseIcon, PlayIcon, StepBackIcon, StepIcon } from './icons'
 import { interactiveSession } from './tour'
 import { useSim } from './useSim'
 
@@ -94,7 +94,18 @@ export function Controls({ ctl }: Props) {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
+            onClick={() => ctl.stepBack()}
+            disabled={cluster.eventCount === 0}
+            aria-keyshortcuts="ArrowLeft"
+            className="flex items-center gap-1.5 rounded border border-slate-700 px-3 py-1.5 text-slate-100 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400 disabled:opacity-40"
+          >
+            <StepBackIcon className="h-4 w-4" />
+            Back
+          </button>
+          <button
+            type="button"
             onClick={() => ctl.toggle()}
+            aria-keyshortcuts="Space"
             className="flex items-center gap-1.5 rounded border border-slate-700 px-3 py-1.5 text-slate-100 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
           >
             {ctl.playing ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4" />}
@@ -103,6 +114,7 @@ export function Controls({ ctl }: Props) {
           <button
             type="button"
             onClick={() => ctl.stepOnce()}
+            aria-keyshortcuts="ArrowRight"
             className="flex items-center gap-1.5 rounded border border-slate-700 px-3 py-1.5 text-slate-100 hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
           >
             <StepIcon className="h-4 w-4" />
@@ -125,6 +137,10 @@ export function Controls({ ctl }: Props) {
           </label>
           <span className="ml-auto tabular-nums text-slate-400">t = {Math.round(cluster.now)} ms</span>
         </div>
+        <p className="text-xs text-slate-400">
+          Keys: <kbd className="font-sans">Space</kbd> plays or pauses, <kbd className="font-sans">Left</kbd>{' '}
+          and <kbd className="font-sans">Right</kbd> step one event.
+        </p>
       </fieldset>
 
       <fieldset className="flex flex-col gap-2">

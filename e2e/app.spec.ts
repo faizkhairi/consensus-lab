@@ -29,6 +29,24 @@ test('elects a leader on the landing page', async ({ page }) => {
   await expect(invariant(page, 'Election Safety')).toContainText('Holds')
 })
 
+test('arrow keys and the Back button step one event at a time', async ({ page }) => {
+  await page.goto('./')
+  await expect(page.getByRole('img', { name: /Cluster of 5 servers/ })).toBeVisible()
+  const eventNumber = async () =>
+    Number((await page.getByText(/^event #\d+$/).textContent())?.replace('event #', ''))
+  // The first step also pauses the autoplaying run.
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible()
+  const start = await eventNumber()
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByText(`event #${start + 2}`, { exact: true })).toBeVisible()
+  await page.keyboard.press('ArrowLeft')
+  await expect(page.getByText(`event #${start + 1}`, { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Back' }).click()
+  await expect(page.getByText(`event #${start}`, { exact: true })).toBeVisible()
+})
+
 test('a shared link replays the exact run, including its violation', async ({ page }) => {
   const fuzzCase = PINNED.skipUpToDateCheck
   const hash = encodeRun({ session: replaySession(fuzzCase), time: fuzzCase.duration })
