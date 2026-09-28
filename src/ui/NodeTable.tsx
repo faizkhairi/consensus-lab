@@ -13,7 +13,8 @@ export function NodeTable({ ctl }: Props) {
 
   return (
     <section className="rounded-lg border border-slate-800 bg-slate-900 p-4">
-      <div className="overflow-x-auto">
+      {/* relative: keeps the sr-only header (absolute) inside the scroll box, or it widens the page */}
+      <div className="relative overflow-x-auto">
         <table className="w-full text-left text-sm">
           <caption className="mb-2 text-left text-sm font-semibold text-slate-200">Servers</caption>
           <thead>

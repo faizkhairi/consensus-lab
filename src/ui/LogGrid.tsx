@@ -55,7 +55,7 @@ export function LogGrid({ ctl }: Props) {
   return (
     <section className="rounded-lg border border-slate-800 bg-slate-900 p-4">
       <h2 className="text-sm font-semibold text-slate-200">Replicated logs</h2>
-      <div className="mt-2 overflow-x-auto">
+      <div className="relative mt-2 overflow-x-auto">
         <table className="border-separate border-spacing-0.5">
           <caption className="sr-only">Replicated logs by server, with the oracle's committed view</caption>
           <thead>
