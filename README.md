@@ -35,12 +35,12 @@ The same idea underpins deterministic simulation testing at FoundationDB and Tig
 
 Measured over consecutive seeds, with 6 seconds of simulated time and a random fault schedule per seed:
 
-| Mode | Runs with a safety violation | Minimal counterexample found |
-|---|---|---|
-| Correct Raft | 0 of 20,000 | n/a |
-| Commit entries from earlier terms | 15 of 10,000 | 6 faults (from 31) |
-| Forget `votedFor` on restart | 40 of 10,000 | 1 fault (from 83) |
-| Skip the up-to-date check | 9,019 of 10,000 | 1 fault (from 58) |
+| Mode                              | Runs with a safety violation | Minimal counterexample found |
+| --------------------------------- | ---------------------------- | ---------------------------- |
+| Correct Raft                      | 0 of 20,000                  | n/a                          |
+| Commit entries from earlier terms | 15 of 10,000                 | 6 faults (from 31)           |
+| Forget `votedFor` on restart      | 40 of 10,000                 | 1 fault (from 83)            |
+| Skip the up-to-date check         | 9,019 of 10,000              | 1 fault (from 58)            |
 
 The simulator processes about 4 million events per second on one laptop core. CI fuzzes 20,000 seeds of correct Raft on every push.
 
@@ -53,14 +53,14 @@ npm ci
 npm run dev          # http://localhost:5173/consensus-lab/
 ```
 
-| Command | What it does |
-|---|---|
-| `npm test` | unit, scenario and property tests |
-| `npm run test:coverage` | the same, with the coverage floor on `src/sim` |
-| `npm run fuzz` | deep fuzz (`FUZZ_SEEDS=20000 npm run fuzz` for more seeds) |
-| `npm run e2e` | Playwright end-to-end and accessibility tests against a production build |
-| `npm run check` | Biome lint and format, plus the repository's punctuation check |
-| `npm run typecheck` | TypeScript |
+| Command                 | What it does                                                             |
+| ----------------------- | ------------------------------------------------------------------------ |
+| `npm test`              | unit, scenario and property tests                                        |
+| `npm run test:coverage` | the same, with the coverage floor on `src/sim`                           |
+| `npm run fuzz`          | deep fuzz (`FUZZ_SEEDS=20000 npm run fuzz` for more seeds)               |
+| `npm run e2e`           | Playwright end-to-end and accessibility tests against a production build |
+| `npm run check`         | Biome lint and format, plus the repository's punctuation check           |
+| `npm run typecheck`     | TypeScript                                                               |
 
 ## Layout
 

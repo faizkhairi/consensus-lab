@@ -31,7 +31,7 @@ export const INVARIANT_INFO: Record<InvariantId, { title: string; rule: string }
 }
 
 const name = (id: NodeId) => `S${id + 1}`
-const describe = (entry: LogEntry) => `${entry.cmd}@t${entry.term}`
+const formatEntry = (entry: LogEntry) => `${entry.cmd}@t${entry.term}`
 
 const sameEntry = (a: LogEntry | undefined, b: LogEntry | undefined) =>
   a !== undefined && b !== undefined && a.term === b.term && a.cmd === b.cmd
@@ -85,8 +85,8 @@ export class Oracle {
           index: i,
           message:
             `${name(node.id)} became leader of term ${term} without committed entry ` +
-            `${describe(committed)} at index ${i}` +
-            (has ? ` (it has ${describe(has)} there).` : ' (its log ends before that index).'),
+            `${formatEntry(committed)} at index ${i}` +
+            (has ? ` (it has ${formatEntry(has)} there).` : ' (its log ends before that index).'),
         })
         break
       }
@@ -111,8 +111,8 @@ export class Oracle {
           nodes: [node.id],
           index: i,
           message:
-            `${name(node.id)} committed ${describe(entry)} at index ${i}, ` +
-            `but ${describe(known)} was already committed there.`,
+            `${name(node.id)} committed ${formatEntry(entry)} at index ${i}, ` +
+            `but ${formatEntry(known)} was already committed there.`,
         })
         break
       }
