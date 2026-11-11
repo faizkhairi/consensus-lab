@@ -9,6 +9,10 @@ updates:
       dev-dependencies:
         applies-to: version-updates
         dependency-type: development
+      # react and react-dom must move together: a split bump fails at runtime (React error 527).
+      react:
+        applies-to: version-updates
+        patterns: ["react", "react-dom"]
       npm-security:
         applies-to: security-updates
         patterns: ["*"]
